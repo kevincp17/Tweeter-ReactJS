@@ -1,39 +1,37 @@
 import React, { useState, useEffect,useCallback,Fragment  } from 'react'
 import { useDispatch,useSelector } from 'react-redux'
 import { Link,Outlet,useNavigate,useLocation } from 'react-router-dom'
-import { useFormik } from 'formik'
+import { useFormik, validateYupSchema } from 'formik'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { solid, regular, brands } from '@fortawesome/fontawesome-svg-core/import.macro'
 import { Popover, Transition } from '@headlessui/react'
-import {GetAllTweetsRequest,AddLikeRequest,UnlikeRequest,AddSaveRequest,UnsaveRequest} from '../redux-saga/Action/HomePageActions'
+import {GetAllTweetsRequest,AddLikeRequest,UnlikeRequest,AddSaveRequest,UnsaveRequest,PostTweetRequest,GetWhoToFollowRequest} from '../redux-saga/Action/HomePageActions'
 import {GetOneUserRequest,LogoutRequest} from '../redux-saga/Action/LoginPageAction'
 import config from '../config/config'
 export default function HomePage(){
     const navigate = useNavigate()
     const location=useLocation()
+    const options = { year: "numeric", month: "long", day: "numeric"}
+    
     const [selectHome,setSelectHome]=useState(true)
     const [selectExplore,setSelectExplore]=useState(false)
     const [selectBookmark,setSelectBookmark]=useState(false)
     const [selectEveryone,setSelectEveryone]=useState(true)
     const [selectPeopleFollow,setSelectPeopleFollow]=useState(false)
     const [refresh, setRefresh] = useState(false)
+    const [refreshFollower, setRefreshFollower] = useState(false)
     const [tweetLikeId, setTweetLikeId] = useState(null)
     const [userLikeId, setuserLikeId] = useState(null)
     const dispatch = useDispatch();
-    const {tweets} = useSelector(state => state.homePageState)
+    const {tweets,who_to_follow} = useSelector(state => state.homePageState)
     const {user} = useSelector(state => state.loginPageState)
-    let date
+    console.log(tweets);
 
     useEffect(() => {
         dispatch(GetAllTweetsRequest());
         dispatch(GetOneUserRequest(sessionStorage.getItem('username')));
         setRefresh(false)
     }, [refresh])
-
-    const getDateCreated = async (timestamp) =>{
-        let date=new Date(timestamp)
-        return date.getDate()
-    }
 
     const likeTweet = async (twid,uid) =>{
         setTweetLikeId(twid)
@@ -52,6 +50,7 @@ export default function HomePage(){
         };
         dispatch(UnlikeRequest(payload))
         setRefresh(true)
+        return tweets
     }
 
     const unsaveTweet = async (twid,uid) =>{
@@ -62,6 +61,25 @@ export default function HomePage(){
         dispatch(UnsaveRequest(payload))
         setRefresh(true)
     }
+
+    const formikPost = useFormik({
+        enableReinitialize:true,
+        initialValues: {
+            tweet_user_id:'',
+            tweet_body:'',
+            picture:null
+        },
+        onSubmit: async (values) => {
+            const payload = {
+                tweet_user_id:user.user_id,
+                tweet_body:values.tweet_body,
+                picture:values.picture
+            };
+            dispatch(PostTweetRequest(payload))
+            console.log(tweets);
+            setRefresh(true)
+        }
+    })
 
     const formikLike = useFormik({
         enableReinitialize: true,
@@ -74,7 +92,6 @@ export default function HomePage(){
                 tweet_id: tweetLikeId,
                 user_id:userLikeId
             };
-            console.log(payload);
             dispatch(AddLikeRequest(payload))
             setTweetLikeId(null)
             setuserLikeId(null)
@@ -174,7 +191,7 @@ export default function HomePage(){
                                     </Link>
                                 </div>
 
-                                <div>
+                                {/* <div>
                                     <button className='flex flex-row transition hover:bg-gray-100 w-full h-9 items-center px-2 rounded-lg'>
                                         <div><FontAwesomeIcon  className="h-4 w-4 mr-2" icon={solid('user-group')}/></div>
                                         <div>Group Chat</div>
@@ -188,7 +205,7 @@ export default function HomePage(){
                                         <div>Settings</div>
                                         
                                     </button>
-                                </div>
+                                </div> */}
 
                                 <div className='text-red-400'>
                                     <button className='flex flex-row transition hover:bg-gray-100 w-full h-9 items-center px-2 rounded-lg'>
@@ -237,7 +254,16 @@ export default function HomePage(){
 
                                         
                                     </div>
-                                    <input type='text' className=''/>
+                                    <input 
+                                        type='text' 
+                                        className=''
+                                        name="tweet_body"
+                                        id="tweet_body"
+                                        value={formikPost.values.tweet_body}
+                                        onChange={formikPost.handleChange}
+                                        onBlur={formikPost.handleBlur}
+                                        autoComplete="tweet_body"
+                                    />
                                 </div>
 
                                 <div className='flex flex-row w-full'>
@@ -299,7 +325,7 @@ export default function HomePage(){
                                     </div>
 
                                     <div className='w-1/2 flex justify-end'>
-                                        <button className='bg-cyan-400 rounded h-7 w-16 text-white font-medium text-base'>Tweet</button>
+                                        <button type='submit' className='bg-cyan-400 rounded h-7 w-16 text-white font-medium text-base' onClick={formikPost.handleSubmit}>Tweet</button>
                                     </div>
                                 </div>
                             </div>
@@ -325,12 +351,14 @@ export default function HomePage(){
 
                                                     <div className='flex flex-col py-2'>
                                                         <div className='font-bold'>
-                                                            {tw.tweet_user.name}
+                                                            <Link to='/other_profile' state={{ otherUserId:tw.tweet_user_id, otherUsername:tw.tweet_user.username }}>
+                                                                <button className='transition hover:text-cyan-400' onClick={()=>{setSelectHome(false);setSelectExplore(false);setSelectBookmark(false)}}>{tw.tweet_user.name}</button>
+                                                            </Link>
                                                         </div>
 
                                                         <div className='text-sm text-gray-400'>
                                                             {
-                                                                tw.time_created
+                                                                new Date(tw.time_created).toLocaleDateString(undefined, options)
                                                             }
                                                         </div>
                                                     </div>
@@ -507,28 +535,46 @@ export default function HomePage(){
                                 </div>
                             </div>
 
-                            <div className='bg-white border border-gray-200 rounded-lg p-2 shadow'>
-                                <div className='border-b pb-2 font-semibold'>
+                            {/* <div className='bg-white border border-gray-200 rounded-lg p-2 shadow'> */}
+                                {/* <div className='border-b pb-2 font-semibold'>
                                     Who to follow
                                 </div>
 
-                                <div className='flex flex-col w-full'>
+                                {
+                                    who_to_follow && who_to_follow.map(whf=>{
+                                        return(
+                                            <div className='flex flex-col w-full'>
                                     <div className='flex flex-row space-x-3 py-3 items-center'>
                                         <div className='w-1/6'>
+                                            {
+                                                whf.photo
+                                                ?
+                                                
                                             <img
-                                                className='rounded-md h-10 w-10'
-                                                src="https://bobbyhadz.com/images/blog/react-prevent-multiple-button-clicks/thumbnail.webp"
-                                                alt="car"
-                                            />
+                                            className='rounded-md h-8 w-8'
+                                            crossOrigin="anonymous" 
+                                            src={config.domain+'/image/file/'+whf.photo}
+                                            alt="car"
+                                        />
+                                                :
+                                            <img
+                                                                    className='rounded-md h-10 w-10'
+                                                                    crossOrigin="anonymous" 
+                                                                    src={config.domain+'/image/file/default.jpg'}
+                                                                    alt="car"
+                                                                />
+
+                                            }
+                                            
                                         </div>
 
                                         <div className='flex flex-col w-3/6 pb-1'>
                                             <div className='font-bold'>
-                                                Kevin
+                                                {whf.name}
                                             </div>
 
                                             <div className='text-sm text-gray-400'>
-                                                18k followers
+                                            {whf.count} followers
                                             </div>
                                         </div>
 
@@ -545,7 +591,10 @@ export default function HomePage(){
                                     foto
                                     </div>
                                 </div>
-                            </div>
+                                        )
+                                    })
+                                }
+                            </div> */}
                         </div>
                     </div>
                     :

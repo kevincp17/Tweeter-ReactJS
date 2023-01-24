@@ -38,6 +38,10 @@ module.exports = function(sequelize, DataTypes) {
     refresh_token: {
       type: DataTypes.STRING(255),
       allowNull: true
+    },
+    header_photo: {
+      type: DataTypes.STRING(255),
+      allowNull: true
     }
   }, {
     sequelize,

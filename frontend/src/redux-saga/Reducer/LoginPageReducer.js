@@ -3,7 +3,8 @@ import * as ActionType from '../Constant/LoginPageConstant'
 const INIT_STATE = {
     users:[],
     user:[],
-    isLoggedIn:JSON.parse(sessionStorage.getItem('isLoggedIn'))=== true ? true :false 
+    isLoggedIn:false,
+    userId:null
 }
 
 const LoginPageReduce = (state = INIT_STATE, action) => {
@@ -31,10 +32,12 @@ const LoginPageReduce = (state = INIT_STATE, action) => {
 
 const LoginSucceed = (state, action) => {
     const {payload} = action
+    sessionStorage.setItem('isLoggedIn',true)
+    sessionStorage.setItem('userId',true)
     return {
         ...state,
         users : [...state.users,payload],
-        isLoggedIn:true
+        isLoggedIn:sessionStorage.getItem('isLoggedIn')
     }
 }
 
@@ -56,10 +59,11 @@ const GetOneUserSucceed = (state, action) => {
 const LogoutSucceed = (state, action) => {
     const { payload } = action
     const filterUser = state.users.filter(el => el.user_id !== payload)
+    sessionStorage.setItem('isLoggedIn',false)
     return {
         ...state,
         users: [...filterUser],
-        isLoggedIn: false
+        isLoggedIn: sessionStorage.getItem('isLoggedIn')
     }
 }
 

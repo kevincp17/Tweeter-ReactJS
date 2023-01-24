@@ -5,6 +5,7 @@ import ExplorePage from './views/ExplorePage';
 import BookmarkPage from './views/BookmarkPage'; 
 import LoginPage from './views/LoginPage';
 import ProfilePage from './views/ProfilePage';
+import OtherProfilePage from './views/OtherProfilePage';
 
 export default function Routes(isLoggedIn) {
   return useRoutes([
@@ -28,7 +29,8 @@ export default function Routes(isLoggedIn) {
           children:[
             {path: '/explore', element: <ExplorePage/>},
             {path: '/bookmarks', element: <BookmarkPage/>},
-            {path: '/profile', element: <ProfilePage/>}
+            {path: '/profile', element: <ProfilePage/>},
+            {path: '/other_profile', element: <OtherProfilePage/>}
           ]
     },
     { path: '*', element: <Navigate to="/404" replace /> }

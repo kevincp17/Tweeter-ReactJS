@@ -3,28 +3,30 @@ import { useDispatch,useSelector } from 'react-redux'
 import { useFormik } from 'formik'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { solid, regular, brands } from '@fortawesome/fontawesome-svg-core/import.macro'
-import {GetTopTweetsRequest,GetLatestTweetsRequest} from '../redux-saga/Action/ExplorePageAction'
+import {GetTopTweetsRequest,GetLatestTweetsRequest,GetPopularUserRequest} from '../redux-saga/Action/ExplorePageAction'
 import {AddLikeRequest,UnlikeRequest,AddSaveRequest,UnsaveRequest} from '../redux-saga/Action/HomePageActions'
 import config from '../config/config'
 
 export default function ExplorePage(){
     const dispatch = useDispatch();
+    const options = { year: "numeric", month: "long", day: "numeric"}
     
     const [selectTop,setSelectTop]=useState(true)
     const [selectLatest,setSelectLatest]=useState(false)
     const [selectPeople,setSelectPeople]=useState(false)
-    const [selectMedia,setSelectMedia]=useState(false)
     const [refresh, setRefresh] = useState(false)
     const [tweetLikeId, setTweetLikeId] = useState(null)
     const [userLikeId, setuserLikeId] = useState(null)
 
     
-    const {top_tweets,latest_tweets} = useSelector(state => state.explorePageState)
+    const {top_tweets,latest_tweets,popular_users} = useSelector(state => state.explorePageState)
     const {user} = useSelector(state => state.loginPageState)
+    console.log(popular_users);
 
     useEffect(() => {
         dispatch(GetTopTweetsRequest());
         dispatch(GetLatestTweetsRequest());
+        dispatch(GetPopularUserRequest(user.user_id));
         setRefresh(false)
     }, [refresh])
 
@@ -96,21 +98,17 @@ export default function ExplorePage(){
     
     return(
         <div className='flex flex-row space-x-5 w-full pt-3 px-32'>
-            <div className='flex flex-col bg-white p-3 w-4/12 shadow rounded-lg space-y-3 h-40 font-semibold text-gray-400'>
-                <button onClick={()=>{setSelectTop(true);setSelectLatest(false);setSelectPeople(false);setSelectMedia(false)}} className={selectTop ? 'flex justify-start px-2 border-l-2 border-cyan-400' : 'flex justify-start px-2 border-l-2 border-white'}>
+            <div className='flex flex-col bg-white p-3 w-4/12 shadow rounded-lg space-y-3 h-32 font-semibold text-gray-400'>
+                <button onClick={()=>{setSelectTop(true);setSelectLatest(false);setSelectPeople(false)}} className={selectTop ? 'flex justify-start px-2 border-l-2 border-cyan-400' : 'flex justify-start px-2 border-l-2 border-white'}>
                     Top
                 </button>
 
-                <button onClick={()=>{setSelectTop(false);setSelectLatest(true);setSelectPeople(false);setSelectMedia(false)}} className={selectLatest ? 'flex justify-start px-2 border-l-2 border-cyan-400' : 'flex justify-start px-2 border-l-2 border-white'}>
+                <button onClick={()=>{setSelectTop(false);setSelectLatest(true);setSelectPeople(false)}} className={selectLatest ? 'flex justify-start px-2 border-l-2 border-cyan-400' : 'flex justify-start px-2 border-l-2 border-white'}>
                     Latest
                 </button>
 
-                <button onClick={()=>{setSelectTop(false);setSelectLatest(false);setSelectPeople(true);setSelectMedia(false)}} className={selectPeople ? 'flex justify-start px-2 border-l-2 border-cyan-400' : 'flex justify-start px-2 border-l-2 border-white'}>
+                <button onClick={()=>{setSelectTop(false);setSelectLatest(false);setSelectPeople(true)}} className={selectPeople ? 'flex justify-start px-2 border-l-2 border-cyan-400' : 'flex justify-start px-2 border-l-2 border-white'}>
                     People
-                </button>
-
-                <button onClick={()=>{setSelectTop(false);setSelectLatest(false);setSelectPeople(false);setSelectMedia(true)}} className={selectMedia ? 'flex justify-start px-2 border-l-2 border-cyan-400' : 'flex justify-start px-2 border-l-2 border-white'}>
-                    Media
                 </button>
             </div>
 
@@ -152,7 +150,7 @@ export default function ExplorePage(){
 
                                         <div className='text-sm text-gray-400'>
                                             {
-                                                Date(tp.time_created)
+                                                new Date(tp.time_created).toLocaleDateString(undefined, options)
                                             }
                                         </div>
                                     </div>
@@ -337,8 +335,8 @@ export default function ExplorePage(){
                                         </div>
 
                                         <div className='text-sm text-gray-400'>
-                                            {
-                                                Date(tl.time_created)
+                                            {                          
+                                                new Date(tl.time_created).toLocaleDateString(undefined, options)
                                             }
                                         </div>
                                     </div>
@@ -491,6 +489,59 @@ export default function ExplorePage(){
                                                             )
                                                         })
                                                     }
+                                </div>
+                            </div>
+                        )
+                    })
+                    :
+                    selectPeople
+                    ?
+                    popular_users && popular_users.map(pu=>{
+                        return(
+                            <div key={pu.user_id} className='flex flex-col bg-white p-3 w-full border border-gray-200 rounded-lg mt-5 shadow mb-3'>
+                                <div className='flex flex-row'>
+                                    <div className='w-1/12 flex items-center'>
+                                    {
+                                        pu.photo
+                                        ?
+                                        <img
+                                            className='rounded-md h-10 w-10'
+                                            crossOrigin="anonymous" 
+                                            src={config.domain+'/image/file/'+pu.photo}
+                                            alt="car"
+                                        />
+                                        :
+                                        <img
+                                            className='rounded-md h-10 w-10'
+                                            crossOrigin="anonymous" 
+                                            src={config.domain+'/image/file/default.jpg'}
+                                            alt="car"
+                                        />
+                                    }
+                                    </div>
+
+                                    <div className='flex flex-col items-start w-9/12'>
+                                        <div className='font-bold'>{pu.name}</div>
+
+                                        <div className='text-gray-400'>{pu.followers} followers</div>
+                                    </div>
+
+                                    <div className='w-2/12 flex items-center'>
+                                        {
+                                            pu.follower_id===user.user_id
+                                            ?
+                                            <button className='bg-cyan-400 h-9 w-24 rounded-lg text-white'>
+                                                <FontAwesomeIcon  className="h-4 w-4 mr-2" icon={solid('user-plus')}/>
+                                                Unfollow
+                                            </button>
+                                            :
+                                            <button className='bg-cyan-400 h-9 w-24 rounded-lg text-white'>
+                                                <FontAwesomeIcon  className="h-4 w-4 mr-2" icon={solid('user-plus')}/>
+                                                Follow
+                                            </button>
+                                        }
+                                        
+                                    </div>
                                 </div>
                             </div>
                         )

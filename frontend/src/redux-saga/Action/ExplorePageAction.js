@@ -1,5 +1,20 @@
 import * as ActionType from '../Constant/ExplorePageConstant'
 
+export const GetPopularUserRequest = (payload) => ({
+    type : ActionType.GET_POPULAR_USER_REQUEST,
+    payload
+})
+
+export const GetPopularUserSuccess = (payload) => ({
+    type : ActionType.GET_POPULAR_USER_SUCCESS,
+    payload
+})
+
+export const GetPopularUserFailed = (payload) => ({
+    type : ActionType.GET_POPULAR_USER_FAILED,
+    payload
+})
+
 export const GetTopTweetsRequest = () => ({
     type : ActionType.GET_TOP_TWEETS_REQUEST
 })

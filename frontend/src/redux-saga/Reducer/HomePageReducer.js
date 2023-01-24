@@ -3,6 +3,7 @@ import * as ActionType from '../Constant/HomePageConstant'
 const INIT_STATE = {
     tweets: [],
     tweet:[],
+    tweet_contents:[],
 
     users:[],
     user:[],
@@ -12,6 +13,8 @@ const INIT_STATE = {
     likes:[],
 
     saves:[],
+
+    who_to_follow:[]
 }
 
 const HomePageReduce = (state = INIT_STATE, action) => {
@@ -20,10 +23,18 @@ const HomePageReduce = (state = INIT_STATE, action) => {
             return { ...state }
         case ActionType.GET_ALL_TWEETS_SUCCESS:
             return GetAllTweetsSucceed(state, action)
+        case ActionType.POST_TWEET_REQUEST:
+            return { ...state }
+        case ActionType.POST_TWEET_SUCCESS:
+            return PostTweetSucceed(state, action)
         case ActionType.GET_ALL_REPLIES_REQUEST:
             return { ...state }
         case ActionType.GET_ALL_REPLIES_SUCCESS:
             return GetAllRepliesSucceed(state, action)
+        case ActionType.GET_WHO_TO_FOLLOW_REQUEST:
+            return { ...state }
+        case ActionType.GET_WHO_TO_FOLLOW_SUCCESS:
+            return GetWhoToFollowSucceed(state, action)
         case ActionType.GET_ONE_USER_REQUEST:
             return { ...state }
         case ActionType.GET_ONE_USER_SUCCESS:
@@ -60,10 +71,25 @@ const GetAllTweetsSucceed = (state, action) => {
     }
 }
 
+const PostTweetSucceed = (state,action) =>{
+    const {payload} = action
+    return {
+        ...state,
+        tweets : [...state.tweets,payload]
+    }
+}
+
 const GetAllRepliesSucceed = (state, action) => {
     return {
         ...state,
         replies: action.payload
+    }
+}
+
+const GetWhoToFollowSucceed = (state, action) => {
+    return {
+        ...state,
+        who_to_follow: action.payload
     }
 }
 
@@ -82,6 +108,7 @@ const UnlikeSucceed = (state, action) => {
         likes: [...filterLike]
     }
 }
+
 const AddLikeSucceed = (state,action) =>{
     const {payload} = action
     return {

@@ -1,9 +1,11 @@
 import {call,put} from 'redux-saga/effects'
 import tweetApi from '../../api/tweetApi'
+import followerApi from '../../api/followerApi'
 
 import { 
     GetTopTweetsSuccess,GetTopTweetsFailed,
-    GetLatestTweetsSuccess,GetLatestTweetsFailed
+    GetLatestTweetsSuccess,GetLatestTweetsFailed,
+    GetPopularUserSuccess,GetPopularUserFailed
 } from '../Action/ExplorePageAction'
 
 
@@ -25,7 +27,18 @@ function* handleGetLatestTweets(){
     }
 }
 
+function* handleGetPopularUser(action){
+    const {payload} = action
+    try {
+        const result = yield call(followerApi.listMostFollower,payload)
+        yield put(GetPopularUserSuccess(result))
+    } catch (error) {
+        yield put(GetPopularUserFailed(error))
+    }
+}
+
 export {
     handleGetTopTweets,
-    handleGetLatestTweets
+    handleGetLatestTweets,
+    handleGetPopularUser
 }

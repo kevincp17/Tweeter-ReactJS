@@ -11,7 +11,7 @@ export default function LoginPage(){
     const location=useLocation();
     const dispatch = useDispatch()
     const [selectLogin,setSelectLogin]=useState(true)
-
+    
     const formikLogin = useFormik({
         initialValues: {
             username: '',
@@ -25,6 +25,7 @@ export default function LoginPage(){
 
                 sessionStorage.setItem('username',values.username)
                 dispatch(LoginRequest(payload))
+                sessionStorage.setItem('isLoggedIn',true)
                 navigate('/')
             }
         })
@@ -81,7 +82,6 @@ export default function LoginPage(){
                             autoComplete="name"
                             />
                         </div>
-
                     }
 
                     <div className='w-full'>

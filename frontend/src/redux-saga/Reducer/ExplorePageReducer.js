@@ -5,6 +5,8 @@ const INIT_STATE = {
 
     latest_tweets:[],
 
+    popular_users:[]
+
 }
 
 const ExplorePageReduce = (state = INIT_STATE, action) => {
@@ -17,6 +19,10 @@ const ExplorePageReduce = (state = INIT_STATE, action) => {
             return { ...state }
         case ActionType.GET_LATEST_TWEETS_SUCCESS:
             return GetLatestTweetsSucceed(state, action)
+        case ActionType.GET_POPULAR_USER_REQUEST:
+            return { ...state }
+        case ActionType.GET_POPULAR_USER_SUCCESS:
+            return GetPopularUsersSucceed(state, action)
         default:
             return state
     }
@@ -33,6 +39,13 @@ const GetLatestTweetsSucceed = (state, action) => {
     return {
         ...state,
         latest_tweets: action.payload
+    }
+}
+
+const GetPopularUsersSucceed = (state, action) => {
+    return {
+        ...state,
+        popular_users: action.payload
     }
 }
 

@@ -4,11 +4,14 @@ import userApi from '../../api/userApi'
 import replyApi from '../../api/replyApi'
 import likeApi from '../../api/likeApi'
 import saveApi from '../../api/saveApi'
+import followerApi from '../../api/followerApi'
 
 import { 
     GetAllTweetsSuccess,GetAllTweetsFailed,
+    PostTweetSuccess,PostTweetFailed,
     GetOneUserSuccess,GetOneUserFailed,
     GetAllRepliesSuccess,GetAllRepliesFailed,
+    GetWhoToFollowSuccess,GetWhoToFollowFailed,
     AddLikeSuccess,AddLikeFailed,
     UnlikeSuccess,UnlikeFailed ,
     AddSaveSuccess,AddSaveFailed,
@@ -25,12 +28,32 @@ function* handleGetAllTweets(){
     }
 }
 
+function* handlePostTweet(action){
+    const {payload} = action
+    try {
+        const result = yield call(tweetApi.postTweet,payload)
+        yield put(PostTweetSuccess(result.data))
+    } catch (error) {
+        yield put(PostTweetFailed(error))
+    }
+}
+
 function* handleGetAllReplies(){
     try {
         const result = yield call(replyApi.list)
         yield put(GetAllRepliesSuccess(result))
     } catch (error) {
         yield put(GetAllRepliesFailed(error))
+    }
+}
+
+function* handleGetWhoToFollow(action){
+    const {payload} = action
+    try {
+        const result = yield call(followerApi.listWhoToFollow,payload)
+        yield put(GetWhoToFollowSuccess(result))
+    } catch (error) {
+        yield put(GetWhoToFollowFailed(error))
     }
 }
 
@@ -85,8 +108,10 @@ function* handleUnsave(action){
 
 export {
     handleGetAllTweets,
+    handlePostTweet,
     handleGetOneUser,
     handleGetAllReplies,
+    handleGetWhoToFollow,
     handleAddLike,
     handleUnlike,
     handleAddSave,

@@ -28,6 +28,21 @@ export const GetAllRepliesFailed = (payload) => ({
     payload
 })
 
+export const GetWhoToFollowRequest = (payload) => ({
+    type : ActionType.GET_WHO_TO_FOLLOW_REQUEST,
+    payload
+})
+
+export const GetWhoToFollowSuccess = (payload) => ({
+    type : ActionType.GET_WHO_TO_FOLLOW_SUCCESS,
+    payload
+})
+
+export const GetWhoToFollowFailed = (payload) => ({
+    type : ActionType.GET_WHO_TO_FOLLOW_FAILED,
+    payload
+})
+
 export const GetOneUserRequest = () => ({
     type : ActionType.GET_ONE_USER_REQUEST
 })
@@ -101,6 +116,22 @@ export const UnsaveFailed = (payload) =>({
     type : ActionType.UNSAVE_FAILED,
     payload
 })
+
+export const PostTweetRequest = (payload) => ({
+    type:ActionType.POST_TWEET_REQUEST,
+    payload
+})
+
+export const PostTweetSuccess = (payload) => ({
+    type:ActionType.POST_TWEET_SUCCESS,
+    payload
+})
+
+export const PostTweetFailed = (payload) =>({
+    type : ActionType.POST_TWEET_FAILED,
+    payload
+})
+
 
 export const LogoutRequest = () => ({
     type : ActionType.LOGOUT_REQUEST
